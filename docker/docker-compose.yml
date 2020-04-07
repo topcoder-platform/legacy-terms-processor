@@ -1,0 +1,12 @@
+version: '3'
+services:
+  legacy-terms-processor:
+    image: legacy-terms-processor:latest
+    container_name: legacy-terms-processor
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    env_file:
+      - api.env
+    network_mode: "host"
+    command: run start
