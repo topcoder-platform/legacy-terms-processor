@@ -16,7 +16,7 @@ const config = require('config')
  * @param {Object} message The kakfa event message to handle
  */
 async function agreeTermsOfUse (message) {
-  const whereCondition = { terms_of_use_id: message.payload.termsOfUseId }
+  const whereCondition = { terms_of_use_id: message.payload.legacyId }
 
   // get informix connection
   const connection = await helper.getInformixConnection()
@@ -27,7 +27,7 @@ async function agreeTermsOfUse (message) {
     const termsOfUse = await informixService.ensureExists(connection, InformixTableNames.TermsOfUse, whereCondition)
 
     if (Number(termsOfUse.terms_of_use_agreeability_type_id) !== AgreeabilityTypes.ElectronicallyAgreeable.id) {
-      throw Error(`The term with id ${message.payload.termsOfUseId} is not electronically agreeable.`)
+      throw Error(`The term with id ${message.payload.termsOfUseId} and legacyId ${message.payload.legacyId} is not electronically agreeable.`)
     }
 
     // Check if the user has already agreed to the terms
@@ -35,11 +35,11 @@ async function agreeTermsOfUse (message) {
       _.assign(whereCondition, { user_id: message.payload.userId }))
 
     if (agreedRecords.length > 0) {
-      throw Error(`User with id ${message.payload.userId} has already agreed to terms with id ${message.payload.termsOfUseId}`)
+      throw Error(`User with id ${message.payload.userId} has already agreed to terms with id ${message.payload.termsOfUseId} and legacyId ${message.payload.legacyId}`)
     }
 
     // Check if user has agreed to all dependent terms of use
-    const termsDependencies = await informixService.getTermsOfUseDependency(connection, message.payload.termsOfUseId, message.payload.userId)
+    const termsDependencies = await informixService.getTermsOfUseDependency(connection, message.payload.legacyId, message.payload.userId)
     for (let dependency of termsDependencies) {
       if (_.isUndefined(dependency.user_id)) {
         throw Error(`You can't agree to this terms of use before you have agreed to all the dependencies terms of use.`)
@@ -52,14 +52,14 @@ async function agreeTermsOfUse (message) {
     })
 
     if (ban.length > 0) {
-      throw Error(`User with id ${message.payload.userId} is banned from agreeing to terms with id ${message.payload.termsOfUseId}`)
+      throw Error(`User with id ${message.payload.userId} is banned from agreeing to terms with id ${message.payload.termsOfUseId} and legacyId ${message.payload.legacyId}`)
     }
 
     // Insert the record to user terms of use Xref table to make user agreed to terms
     const createdAt = helper.convertDateToInformixFormat(message.payload.created)
     await informixService.insertRecord(connection, InformixTableNames.UserTermsOfUseXref, {
       user_id: message.payload.userId,
-      terms_of_use_id: message.payload.termsOfUseId,
+      terms_of_use_id: message.payload.legacyId,
       create_date: createdAt,
       modify_date: createdAt
     })
@@ -90,6 +90,7 @@ agreeTermsOfUse.schema = {
     payload: Joi.object().keys({
       userId: Joi.id().required(),
       termsOfUseId: Joi.string().required(),
+      legacyId: Joi.id().required(),
       created: Joi.date()
     }).unknown(true).required()
   }).unknown(true).required()

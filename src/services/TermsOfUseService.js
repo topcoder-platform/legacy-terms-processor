@@ -186,7 +186,7 @@ update.schema = create.schema
  * @param {Object} message The kakfa event message to handle
  */
 async function remove (message) {
-  const whereCondition = { terms_of_use_id: message.payload.termsOfUseId }
+  const whereCondition = { terms_of_use_id: message.payload.legacyId }
 
   // get informix connection
   const connection = await helper.getInformixConnection()
@@ -201,10 +201,10 @@ async function remove (message) {
 
     // cleanup terms of use dependency table
     await informixService.deleteRecords(connection, InformixTableNames.TermsOfUseDependency, {
-      dependency_terms_of_use_id: message.payload.termsOfUseId
+      dependency_terms_of_use_id: message.payload.legacyId
     })
     await informixService.deleteRecords(connection, InformixTableNames.TermsOfUseDependency, {
-      dependent_terms_of_use_id: message.payload.termsOfUseId
+      dependent_terms_of_use_id: message.payload.legacyId
     })
 
     // Clean the ProjectRoleTermsOfUseXref table
@@ -229,7 +229,7 @@ async function remove (message) {
       toAddress: config.ERROR_EMAIL_RECIPIENT,
       fromAddress: config.ERROR_EMAIL_SENDER,
       message: e.message
-    }, { termsOfUseId: message.payload.termsOfUseId }))
+    }, { termsOfUseId: message.payload.termsOfUseId, legacyId: message.payload.legacyId }))
     throw e
   } finally {
     await connection.closeAsync()
@@ -243,7 +243,8 @@ remove.schema = {
     timestamp: Joi.date().required(),
     'mime-type': Joi.string().required(),
     payload: Joi.object().keys({
-      termsOfUseId: Joi.string().required()
+      termsOfUseId: Joi.string().required(),
+      legacyId: Joi.id().required()
     }).unknown(true).required()
   }).unknown(true).required()
 }
