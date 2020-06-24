@@ -243,7 +243,7 @@ remove.schema = {
     timestamp: Joi.date().required(),
     'mime-type': Joi.string().required(),
     payload: Joi.object().keys({
-      termsOfUseId: Joi.id().required()
+      termsOfUseId: Joi.string().required()
     }).unknown(true).required()
   }).unknown(true).required()
 }
