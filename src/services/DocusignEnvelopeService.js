@@ -57,7 +57,7 @@ create.schema = {
       id: Joi.string().required(),
       docusignTemplateId: Joi.string().required(),
       userId: Joi.id().required(),
-      isCompleted: Joi.id().required()
+      isCompleted: Joi.number().default(0)
     }).unknown(true).required()
   }).unknown(true).required()
 }
