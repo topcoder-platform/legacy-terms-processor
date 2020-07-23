@@ -28,7 +28,7 @@ services:
       terms.notification.resource.deleted:1:1,\
       terms.notification.user.agreed:1:1,\
       terms.legacy.processor.action.email.support:1:1,\
-      terms.notification.docusign.envelop.created:1:1"
+      terms.notification.docusign.envelope.created:1:1"
       KAFKA_ADVERTISED_HOST_NAME: ${IP}
   postgres-db:
     image: "postgres:9.5"

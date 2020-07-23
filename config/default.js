@@ -23,7 +23,7 @@ module.exports = {
   UPDATE_RESOURCE_TERMS_TOPIC: process.env.UPDATE_RESOURCE_TERMS_TOPIC || 'terms.notification.resource.updated',
   DELETE_RESOURCE_TERMS_TOPIC: process.env.DELETE_RESOURCE_TERMS_TOPIC || 'terms.notification.resource.deleted',
 
-  CREATE_DOCUSIGN_ENVELOPE_TOPIC: process.env.CREATE_DOCUSIGN_ENVELOPE_TOPIC || 'terms.notification.docusign.envelop.created',
+  CREATE_DOCUSIGN_ENVELOPE_TOPIC: process.env.CREATE_DOCUSIGN_ENVELOPE_TOPIC || 'terms.notification.docusign.envelope.created',
 
   USER_AGREED_TERMS_TOPIC: process.env.USER_AGREED_TERMS_TOPIC || 'terms.notification.user.agreed',
   TERMS_LEGACY_PROCESSOR_EMAIL_SUPPORT_TOPIC: process.env.TERMS_LEGACY_PROCESSOR_EMAIL_SUPPORT_TOPIC || 'terms.legacy.processor.action.email.support',

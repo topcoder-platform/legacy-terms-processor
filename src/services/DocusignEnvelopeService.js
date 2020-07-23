@@ -24,7 +24,7 @@ async function create (message) {
     await connection.beginTransactionAsync()
 
     await informixService.insertRecord(connection, InformixTableNames.DocusignEnvelope, {
-      docusign_envelop_id: payload.id,
+      docusign_envelope_id: payload.id,
       docusign_template_id: payload.docusignTemplateId,
       user_id: payload.userId,
       is_completed: payload.isCompleted
