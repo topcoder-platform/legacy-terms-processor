@@ -28,6 +28,8 @@ async function create (message) {
     // convert the date to Informix format
     const creationDate = helper.convertDateToInformixFormat(termsOfUse.created)
 
+    const agreeabilityTypeLegacyId = await helper.convertV5AgreeabilityTypeToLegacyId(termsOfUse.agreeabilityTypeId)
+
     await informixService.insertRecord(connection, 'common_oltp:terms_of_use', {
       terms_of_use_id: termsOfUse.id,
       terms_text: { DataType: 'TEXT', Data: termsOfUse.text },
@@ -36,7 +38,7 @@ async function create (message) {
       modify_date: creationDate,
       title: termsOfUse.title,
       url: termsOfUse.url,
-      terms_of_use_agreeability_type_id: termsOfUse.agreeabilityTypeId
+      terms_of_use_agreeability_type_id: agreeabilityTypeLegacyId
     })
 
     if (!_.isNil(termsOfUse.docusignTemplateId) && termsOfUse.agreeabilityTypeId === AgreeabilityTypes.Docusignable.id) {

@@ -19,6 +19,7 @@
   "dependencies": {
     "@hapi/joi": "^15.0.2",
     "@topcoder-platform/topcoder-bus-api-wrapper": "github:topcoder-platform/tc-bus-api-wrapper#master",
+    "axios": "^0.19.0",
     "bluebird": "^3.5.4",
     "config": "^3.1.0",
     "get-parameter-names": "^0.3.0",
@@ -27,6 +28,7 @@
     "lodash": "^4.17.11",
     "no-kafka": "^3.4.3",
     "q": "^1.5.1",
+    "tc-core-library-js": "appirio-tech/tc-core-library-js.git#v2.6.4",
     "topcoder-healthcheck-dropin": "^1.0.3",
     "winston": "^3.2.1"
   },

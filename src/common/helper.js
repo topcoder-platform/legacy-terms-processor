@@ -4,9 +4,12 @@
 
 const _ = require('lodash')
 const config = require('config')
+const axios = require('axios')
 const util = require('util')
 const ifxnjs = require('ifxnjs')
 const logger = require('./logger')
+const m2mAuth = require('tc-core-library-js').auth.m2m
+const m2m = m2mAuth(_.pick(config, ['AUTH0_URL', 'AUTH0_AUDIENCE', 'TOKEN_CACHE_TIME']))
 const busApi = require('@topcoder-platform/topcoder-bus-api-wrapper')
 const busApiClient = busApi(_.pick(config, ['AUTH0_URL', 'AUTH0_AUDIENCE', 'TOKEN_CACHE_TIME', 'AUTH0_CLIENT_ID',
   'AUTH0_CLIENT_SECRET', 'BUSAPI_URL', 'KAFKA_ERROR_TOPIC', 'AUTH0_PROXY_SERVER_URL']))
@@ -125,10 +128,36 @@ async function postEvent (topic, payload) {
   await busApiClient.postEvent(message)
 }
 
+/**
+ * Get M2M token.
+ * @returns {Promise<String>} the M2M token
+ */
+async function getM2MToken () {
+  return m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET)
+}
+
+/**
+ * Converts a v5 Agreeability Type ID to a Legacy Number
+ * @param {String} v5AgreeabilityTypeId the challenge id
+ * @returns {Number} legacy Id
+ */
+async function convertV5AgreeabilityTypeToLegacyId (v5AgreeabilityTypeId) {
+  const token = await getM2MToken()
+  const url = `${config.TERMS_API_URL}/agreeability-types/${v5AgreeabilityTypeId}`
+  logger.debug(`Looking up agreeability type legacy id for ${v5AgreeabilityTypeId}`)
+  const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } })
+  logger.debug(`Result ${JSON.stringify(res)} legacy id: ${res.data.legacyId}`)
+  if (!res || !res.data || !res.data.legacyId) {
+    throw new Error(`Invalid Agreeability Type ID ${v5AgreeabilityTypeId} - Either it doesn't exist, or there's no legacy ID associated`)
+  }
+  return res.data.legacyId || false
+}
+
 module.exports = {
   getKafkaOptions,
   getInformixConnection,
   convertDateToInformixFormat,
+  convertV5AgreeabilityTypeToLegacyId,
   toString,
   sendEmail
 }
