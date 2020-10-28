@@ -146,7 +146,7 @@ async function convertV5AgreeabilityTypeToLegacyId (v5AgreeabilityTypeId) {
   const url = `${config.TERMS_API_URL}/agreeability-types/${v5AgreeabilityTypeId}`
   logger.debug(`Looking up agreeability type legacy id for ${v5AgreeabilityTypeId}`)
   const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } })
-  logger.debug(`Result ${JSON.stringify(res)} legacy id: ${res.data.legacyId}`)
+  logger.debug(`Result ${JSON.stringify(res.data)} legacy id: ${res.data.legacyId}`)
   if (!res || !res.data || !res.data.legacyId) {
     throw new Error(`Invalid Agreeability Type ID ${v5AgreeabilityTypeId} - Either it doesn't exist, or there's no legacy ID associated`)
   }
