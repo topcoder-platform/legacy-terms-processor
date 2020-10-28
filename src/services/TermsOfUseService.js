@@ -99,8 +99,9 @@ async function validateTermsOfUse (connection, termsOfUse, isUpdate) {
     await informixService.ensureExists(connection, InformixTableNames.TermsOfUse, { terms_of_use_id: termsOfUse.id })
   }
 
+  const agreeabilityTypeLegacyId = await helper.convertV5AgreeabilityTypeToLegacyId(termsOfUse.agreeabilityTypeId)
   await informixService.ensureExists(connection, InformixTableNames.TermsOfUseAgreeabilityType, {
-    terms_of_use_agreeability_type_id: termsOfUse.agreeabilityTypeId
+    terms_of_use_agreeability_type_id: agreeabilityTypeLegacyId
   })
 
   await informixService.ensureExists(connection, InformixTableNames.TermsOfUseType, {
