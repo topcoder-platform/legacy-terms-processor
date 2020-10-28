@@ -54,7 +54,7 @@ create.schema = {
     timestamp: Joi.date().required(),
     'mime-type': Joi.string().required(),
     payload: Joi.object().keys({
-      id: Joi.string().required(),
+      id: Joi.uuid().required(),
       docusignTemplateId: Joi.string().required(),
       userId: Joi.id().required(),
       isCompleted: Joi.number().default(0)

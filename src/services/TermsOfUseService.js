@@ -70,14 +70,14 @@ create.schema = {
     timestamp: Joi.date().required(),
     'mime-type': Joi.string().required(),
     payload: Joi.object().keys({
-      id: Joi.id().required(),
+      id: Joi.uuid().required(),
       text: Joi.string().default(null),
       typeId: Joi.id().required(),
       created: Joi.date(),
       updated: Joi.date(),
       title: Joi.string().required(),
       url: Joi.string().default(null),
-      agreeabilityTypeId: Joi.id().required(),
+      agreeabilityTypeId: Joi.uuid().required(),
       docusignTemplateId: Joi.when('agreeabilityTypeId', {
         is: AgreeabilityTypes.Docusignable.id,
         then: Joi.string().required(),

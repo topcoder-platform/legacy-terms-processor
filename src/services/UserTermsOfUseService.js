@@ -89,7 +89,7 @@ agreeTermsOfUse.schema = {
     'mime-type': Joi.string().required(),
     payload: Joi.object().keys({
       userId: Joi.id().required(),
-      termsOfUseId: Joi.string().required(),
+      termsOfUseId: Joi.uuid().required(),
       legacyId: Joi.id().required(),
       created: Joi.date()
     }).unknown(true).required()
