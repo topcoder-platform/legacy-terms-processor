@@ -170,7 +170,7 @@ async function update (message) {
       terms_of_use_agreeability_type_id: termsOfUse.agreeabilityTypeId,
       create_date: helper.convertDateToInformixFormat(termsOfUse.created),
       modify_date: helper.convertDateToInformixFormat(termsOfUse.updated)
-    }, { terms_of_use_id: termsOfUse.id })
+    }, { terms_of_use_id: termsOfUse.legacyId })
 
     // commit the transaction
     await connection.commitTransactionAsync()
