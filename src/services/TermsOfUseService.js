@@ -56,6 +56,8 @@ async function create (message) {
 
     // commit the transaction
     await connection.commitTransactionAsync()
+
+    await helper.updateLegacyIdOnV5(termsOfUse.id, termsId)
   } catch (e) {
     logger.error('Error in processing create terms of use event')
     await connection.rollbackTransactionAsync()

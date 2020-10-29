@@ -144,13 +144,21 @@ async function getM2MToken () {
 async function convertV5AgreeabilityTypeToLegacyId (v5AgreeabilityTypeId) {
   const token = await getM2MToken()
   const url = `${config.TERMS_API_URL}/agreeability-types/${v5AgreeabilityTypeId}`
-  logger.debug(`Looking up agreeability type legacy id for ${v5AgreeabilityTypeId}`)
+  // logger.debug(`Looking up agreeability type legacy id for ${v5AgreeabilityTypeId}`)
   const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } })
-  logger.debug(`Result ${JSON.stringify(res.data)} legacy id: ${res.data.legacyId}`)
+  // logger.debug(`Result ${JSON.stringify(res.data)} legacy id: ${res.data.legacyId}`)
   if (!res || !res.data || !res.data.legacyId) {
     throw new Error(`Invalid Agreeability Type ID ${v5AgreeabilityTypeId} - Either it doesn't exist, or there's no legacy ID associated`)
   }
   return res.data.legacyId || false
+}
+
+async function updateLegacyIdOnV5 (v5TermsId, legacyId) {
+  const token = await getM2MToken()
+  const url = `${config.TERMS_API_URL}/${v5TermsId}`
+  const res = await axios.put(url, { legacyId }, { headers: { Authorization: `Bearer ${token}` } })
+  logger.debug(`updatingLegacy ID on V5 ${v5TermsId} Legacy ID ${legacyId} Response ${JSON.stringify(res)}`)
+  return res || false
 }
 
 module.exports = {
@@ -158,6 +166,7 @@ module.exports = {
   getInformixConnection,
   convertDateToInformixFormat,
   convertV5AgreeabilityTypeToLegacyId,
+  updateLegacyIdOnV5,
   toString,
   sendEmail
 }
