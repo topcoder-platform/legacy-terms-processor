@@ -33,11 +33,11 @@ async function create (message) {
 
     const agreeabilityTypeLegacyId = await helper.convertV5AgreeabilityTypeToLegacyId(termsOfUse.agreeabilityTypeId)
 
-    const termsId = await idTermsGen.getNextId()
-    logger.debug(`Terms of Use Legacy ID Generated: ${termsId}`)
+    const termsLegacyId = await idTermsGen.getNextId()
+    logger.debug(`Terms of Use Legacy ID Generated: ${termsLegacyId}`)
 
     await informixService.insertRecord(connection, 'common_oltp:terms_of_use', {
-      terms_of_use_id: termsId,
+      terms_of_use_id: termsLegacyId,
       terms_text: { DataType: 'TEXT', Data: termsOfUse.text },
       terms_of_use_type_id: termsOfUse.typeId,
       create_date: creationDate,
@@ -49,7 +49,7 @@ async function create (message) {
 
     if (!_.isNil(termsOfUse.docusignTemplateId) && termsOfUse.agreeabilityTypeId === AgreeabilityTypes.Docusignable.id) {
       await informixService.insertRecord(connection, InformixTableNames.TermsOfUseDocusignTemplateXref, {
-        terms_of_use_id: termsId,
+        terms_of_use_id: termsLegacyId,
         docusign_template_id: termsOfUse.docusignTemplateId
       })
     }
@@ -57,7 +57,7 @@ async function create (message) {
     // commit the transaction
     await connection.commitTransactionAsync()
 
-    await helper.updateLegacyIdOnV5(termsOfUse.id, termsId)
+    await helper.updateLegacyIdOnV5(termsOfUse.id, termsLegacyId)
   } catch (e) {
     logger.error('Error in processing create terms of use event')
     await connection.rollbackTransactionAsync()
