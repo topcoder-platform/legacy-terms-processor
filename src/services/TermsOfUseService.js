@@ -161,13 +161,15 @@ async function update (message) {
       }
     }
 
+    const agreeabilityTypeLegacyId = await helper.convertV5AgreeabilityTypeToLegacyId(termsOfUse.agreeabilityTypeId)
+
     // Update the terms_of_use record
     await informixService.updateRecord(connection, 'common_oltp:terms_of_use', {
       terms_text: { DataType: 'TEXT', Data: termsOfUse.text },
       terms_of_use_type_id: termsOfUse.typeId,
       title: termsOfUse.title,
       url: termsOfUse.url,
-      terms_of_use_agreeability_type_id: termsOfUse.agreeabilityTypeId,
+      terms_of_use_agreeability_type_id: agreeabilityTypeLegacyId,
       create_date: helper.convertDateToInformixFormat(termsOfUse.created),
       modify_date: helper.convertDateToInformixFormat(termsOfUse.updated)
     }, { terms_of_use_id: termsOfUse.legacyId })
