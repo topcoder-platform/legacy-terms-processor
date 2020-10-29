@@ -157,7 +157,7 @@ async function updateLegacyIdOnV5 (v5TermsId, legacyId) {
   const token = await getM2MToken()
   const url = `${config.TERMS_API_URL}/${v5TermsId}`
   const res = await axios.put(url, { legacyId }, { headers: { Authorization: `Bearer ${token}` } })
-  logger.debug(`updatingLegacy ID on V5 ${v5TermsId} Legacy ID ${legacyId} Response ${JSON.stringify(res)}`)
+  logger.debug(`updatingLegacy ID on V5 ${v5TermsId} Legacy ID ${legacyId} Response ${JSON.stringify(res.data)}`)
   return res || false
 }
 

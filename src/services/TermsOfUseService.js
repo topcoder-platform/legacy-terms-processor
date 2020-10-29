@@ -266,4 +266,4 @@ module.exports = {
   remove
 }
 
-logger.buildService(module.exports)
+// logger.buildService(module.exports)
