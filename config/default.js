@@ -51,6 +51,8 @@ module.exports = {
 
   KAFKA_MESSAGE_ORIGINATOR: process.env.KAFKA_MESSAGE_ORIGINATOR || 'legacy-terms-processor',
 
+  ID_SEQ_TERMS: process.env.ID_SEQ_TERMS || 'TERMS_OF_USE_SEQ',
+
   // informix database configuration
   INFORMIX: {
     SERVER: process.env.INFORMIX_SERVER || 'informixoltp_tcp', // informix server

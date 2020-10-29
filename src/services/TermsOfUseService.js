@@ -4,11 +4,14 @@
 
 const logger = require('../common/logger')
 const helper = require('../common/helper')
+const IDGenerator = require('../common/IdGenerator')
 const { InformixTableNames, AgreeabilityTypes } = require('../constants')
 const informixService = require('./InformixService')
 const Joi = require('@hapi/joi')
 const _ = require('lodash')
 const config = require('config')
+
+const idTermsGen = new IDGenerator(config.ID_SEQ_TERMS)
 
 /**
  * Handles the create terms of use message.
@@ -30,8 +33,11 @@ async function create (message) {
 
     const agreeabilityTypeLegacyId = await helper.convertV5AgreeabilityTypeToLegacyId(termsOfUse.agreeabilityTypeId)
 
+    const termsId = await idTermsGen.getNextId()
+    logger.debug(`Terms of Use Legacy ID Generated: ${termsId}`)
+
     await informixService.insertRecord(connection, 'common_oltp:terms_of_use', {
-      terms_of_use_id: termsOfUse.id,
+      terms_of_use_id: termsId,
       terms_text: { DataType: 'TEXT', Data: termsOfUse.text },
       terms_of_use_type_id: termsOfUse.typeId,
       create_date: creationDate,
@@ -43,7 +49,7 @@ async function create (message) {
 
     if (!_.isNil(termsOfUse.docusignTemplateId) && termsOfUse.agreeabilityTypeId === AgreeabilityTypes.Docusignable.id) {
       await informixService.insertRecord(connection, InformixTableNames.TermsOfUseDocusignTemplateXref, {
-        terms_of_use_id: termsOfUse.id,
+        terms_of_use_id: termsId,
         docusign_template_id: termsOfUse.docusignTemplateId
       })
     }
