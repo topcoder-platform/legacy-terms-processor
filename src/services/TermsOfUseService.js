@@ -104,7 +104,7 @@ create.schema = {
 async function validateTermsOfUse (connection, termsOfUse, isUpdate) {
   // Ensure that terms of use to update exists in the database in case of update
   if (isUpdate) {
-    await informixService.ensureExists(connection, InformixTableNames.TermsOfUse, { terms_of_use_id: termsOfUse.id })
+    await informixService.ensureExists(connection, InformixTableNames.TermsOfUse, { terms_of_use_id: termsOfUse.legacyId })
   }
 
   const agreeabilityTypeLegacyId = await helper.convertV5AgreeabilityTypeToLegacyId(termsOfUse.agreeabilityTypeId)
@@ -134,7 +134,7 @@ async function update (message) {
 
     // Get the existing docusign template Xref for this terms of use
     let docusignTemplateXref = await informixService.searchRecords(connection,
-      InformixTableNames.TermsOfUseDocusignTemplateXref, { terms_of_use_id: termsOfUse.id })
+      InformixTableNames.TermsOfUseDocusignTemplateXref, { terms_of_use_id: termsOfUse.legacyId })
 
     docusignTemplateXref = docusignTemplateXref.length > 0 ? docusignTemplateXref[0] : null
 
@@ -142,13 +142,13 @@ async function update (message) {
       if (_.isNull(docusignTemplateXref)) {
         // We create a new record in docusign template Xref table
         await informixService.insertRecord(connection, InformixTableNames.TermsOfUseDocusignTemplateXref, {
-          terms_of_use_id: termsOfUse.id,
+          terms_of_use_id: termsOfUse.legacyId,
           docusign_template_id: termsOfUse.docusignTemplateId
         })
       } else {
         // The docusign templateXref record exist, we update it
         await informixService.updateRecord(connection, InformixTableNames.TermsOfUseDocusignTemplateXref,
-          { docusign_template_id: termsOfUse.docusignTemplateId }, { terms_of_use_id: termsOfUse.id })
+          { docusign_template_id: termsOfUse.docusignTemplateId }, { terms_of_use_id: termsOfUse.legacyId })
       }
     } else {
       // docusignTemplateId is not provided in the payload
@@ -156,7 +156,7 @@ async function update (message) {
       if (!_.isNull(docusignTemplateXref)) {
         // We remove the docusign template Xref record
         await informixService.deleteRecords(connection, InformixTableNames.TermsOfUseDocusignTemplateXref, {
-          terms_of_use_id: termsOfUse.id
+          terms_of_use_id: termsOfUse.legacyId
         })
       }
     }
