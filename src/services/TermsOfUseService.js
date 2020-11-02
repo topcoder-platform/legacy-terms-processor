@@ -4,11 +4,14 @@
 
 const logger = require('../common/logger')
 const helper = require('../common/helper')
+const IDGenerator = require('../common/IdGenerator')
 const { InformixTableNames, AgreeabilityTypes } = require('../constants')
 const informixService = require('./InformixService')
 const Joi = require('@hapi/joi')
 const _ = require('lodash')
 const config = require('config')
+
+const idTermsGen = new IDGenerator(config.ID_SEQ_TERMS)
 
 /**
  * Handles the create terms of use message.
@@ -28,26 +31,33 @@ async function create (message) {
     // convert the date to Informix format
     const creationDate = helper.convertDateToInformixFormat(termsOfUse.created)
 
+    const agreeabilityTypeLegacyId = await helper.convertV5AgreeabilityTypeToLegacyId(termsOfUse.agreeabilityTypeId)
+
+    const termsLegacyId = await idTermsGen.getNextId()
+    logger.debug(`Terms of Use Legacy ID Generated: ${termsLegacyId}`)
+
     await informixService.insertRecord(connection, 'common_oltp:terms_of_use', {
-      terms_of_use_id: termsOfUse.id,
+      terms_of_use_id: termsLegacyId,
       terms_text: { DataType: 'TEXT', Data: termsOfUse.text },
       terms_of_use_type_id: termsOfUse.typeId,
       create_date: creationDate,
       modify_date: creationDate,
       title: termsOfUse.title,
       url: termsOfUse.url,
-      terms_of_use_agreeability_type_id: termsOfUse.agreeabilityTypeId
+      terms_of_use_agreeability_type_id: agreeabilityTypeLegacyId
     })
 
     if (!_.isNil(termsOfUse.docusignTemplateId) && termsOfUse.agreeabilityTypeId === AgreeabilityTypes.Docusignable.id) {
       await informixService.insertRecord(connection, InformixTableNames.TermsOfUseDocusignTemplateXref, {
-        terms_of_use_id: termsOfUse.id,
+        terms_of_use_id: termsLegacyId,
         docusign_template_id: termsOfUse.docusignTemplateId
       })
     }
 
     // commit the transaction
     await connection.commitTransactionAsync()
+
+    await helper.updateLegacyIdOnV5(termsOfUse.id, termsLegacyId)
   } catch (e) {
     logger.error('Error in processing create terms of use event')
     await connection.rollbackTransactionAsync()
@@ -70,14 +80,14 @@ create.schema = {
     timestamp: Joi.date().required(),
     'mime-type': Joi.string().required(),
     payload: Joi.object().keys({
-      id: Joi.id().required(),
+      id: Joi.uuid().required(),
       text: Joi.string().default(null),
       typeId: Joi.id().required(),
       created: Joi.date(),
       updated: Joi.date(),
       title: Joi.string().required(),
       url: Joi.string().default(null),
-      agreeabilityTypeId: Joi.id().required(),
+      agreeabilityTypeId: Joi.uuid().required(),
       docusignTemplateId: Joi.when('agreeabilityTypeId', {
         is: AgreeabilityTypes.Docusignable.id,
         then: Joi.string().required(),
@@ -94,11 +104,12 @@ create.schema = {
 async function validateTermsOfUse (connection, termsOfUse, isUpdate) {
   // Ensure that terms of use to update exists in the database in case of update
   if (isUpdate) {
-    await informixService.ensureExists(connection, InformixTableNames.TermsOfUse, { terms_of_use_id: termsOfUse.id })
+    await informixService.ensureExists(connection, InformixTableNames.TermsOfUse, { terms_of_use_id: termsOfUse.legacyId })
   }
 
+  const agreeabilityTypeLegacyId = await helper.convertV5AgreeabilityTypeToLegacyId(termsOfUse.agreeabilityTypeId)
   await informixService.ensureExists(connection, InformixTableNames.TermsOfUseAgreeabilityType, {
-    terms_of_use_agreeability_type_id: termsOfUse.agreeabilityTypeId
+    terms_of_use_agreeability_type_id: agreeabilityTypeLegacyId
   })
 
   await informixService.ensureExists(connection, InformixTableNames.TermsOfUseType, {
@@ -123,7 +134,7 @@ async function update (message) {
 
     // Get the existing docusign template Xref for this terms of use
     let docusignTemplateXref = await informixService.searchRecords(connection,
-      InformixTableNames.TermsOfUseDocusignTemplateXref, { terms_of_use_id: termsOfUse.id })
+      InformixTableNames.TermsOfUseDocusignTemplateXref, { terms_of_use_id: termsOfUse.legacyId })
 
     docusignTemplateXref = docusignTemplateXref.length > 0 ? docusignTemplateXref[0] : null
 
@@ -131,13 +142,13 @@ async function update (message) {
       if (_.isNull(docusignTemplateXref)) {
         // We create a new record in docusign template Xref table
         await informixService.insertRecord(connection, InformixTableNames.TermsOfUseDocusignTemplateXref, {
-          terms_of_use_id: termsOfUse.id,
+          terms_of_use_id: termsOfUse.legacyId,
           docusign_template_id: termsOfUse.docusignTemplateId
         })
       } else {
         // The docusign templateXref record exist, we update it
         await informixService.updateRecord(connection, InformixTableNames.TermsOfUseDocusignTemplateXref,
-          { docusign_template_id: termsOfUse.docusignTemplateId }, { terms_of_use_id: termsOfUse.id })
+          { docusign_template_id: termsOfUse.docusignTemplateId }, { terms_of_use_id: termsOfUse.legacyId })
       }
     } else {
       // docusignTemplateId is not provided in the payload
@@ -145,10 +156,12 @@ async function update (message) {
       if (!_.isNull(docusignTemplateXref)) {
         // We remove the docusign template Xref record
         await informixService.deleteRecords(connection, InformixTableNames.TermsOfUseDocusignTemplateXref, {
-          terms_of_use_id: termsOfUse.id
+          terms_of_use_id: termsOfUse.legacyId
         })
       }
     }
+
+    const agreeabilityTypeLegacyId = await helper.convertV5AgreeabilityTypeToLegacyId(termsOfUse.agreeabilityTypeId)
 
     // Update the terms_of_use record
     await informixService.updateRecord(connection, 'common_oltp:terms_of_use', {
@@ -156,10 +169,10 @@ async function update (message) {
       terms_of_use_type_id: termsOfUse.typeId,
       title: termsOfUse.title,
       url: termsOfUse.url,
-      terms_of_use_agreeability_type_id: termsOfUse.agreeabilityTypeId,
+      terms_of_use_agreeability_type_id: agreeabilityTypeLegacyId,
       create_date: helper.convertDateToInformixFormat(termsOfUse.created),
       modify_date: helper.convertDateToInformixFormat(termsOfUse.updated)
-    }, { terms_of_use_id: termsOfUse.id })
+    }, { terms_of_use_id: termsOfUse.legacyId })
 
     // commit the transaction
     await connection.commitTransactionAsync()

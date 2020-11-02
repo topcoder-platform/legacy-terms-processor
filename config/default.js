@@ -30,6 +30,7 @@ module.exports = {
 
   // bus API config params
   BUSAPI_URL: process.env.BUSAPI_URL || 'https://api.topcoder-dev.com/v5',
+  TERMS_API_URL: process.env.TERMS_API_URL || 'https://api.topcoder-dev.com/v5/terms',
 
   AUTH0_URL: process.env.AUTH0_URL || 'https://topcoder-dev.auth0.com/oauth/token',
   AUTH0_AUDIENCE: process.env.AUTH0_AUDIENCE || 'https://m2m.topcoder-dev.com/',
@@ -49,6 +50,8 @@ module.exports = {
   ERROR_EMAIL_SENDER: process.env.ERROR_EMAIL_SENDER || 'sender@topcoder.com',
 
   KAFKA_MESSAGE_ORIGINATOR: process.env.KAFKA_MESSAGE_ORIGINATOR || 'legacy-terms-processor',
+
+  ID_SEQ_TERMS: process.env.ID_SEQ_TERMS || 'TERMS_OF_USE_SEQ',
 
   // informix database configuration
   INFORMIX: {
