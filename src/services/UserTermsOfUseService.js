@@ -24,11 +24,11 @@ async function agreeTermsOfUse (message) {
     await connection.beginTransactionAsync()
 
     // Get the terms of use from the database
-    const termsOfUse = await informixService.ensureExists(connection, InformixTableNames.TermsOfUse, whereCondition)
+    // const termsOfUse = await informixService.ensureExists(connection, InformixTableNames.TermsOfUse, whereCondition)
 
-    if (Number(termsOfUse.terms_of_use_agreeability_type_id) !== AgreeabilityTypes.ElectronicallyAgreeable.id) {
-      throw Error(`The term with id ${message.payload.termsOfUseId} and legacyId ${message.payload.legacyId} is not electronically agreeable.`)
-    }
+    // if (Number(termsOfUse.terms_of_use_agreeability_type_id) !== AgreeabilityTypes.ElectronicallyAgreeable.id) {
+    //   throw Error(`The term with id ${message.payload.termsOfUseId} and legacyId ${message.payload.legacyId} is not electronically agreeable.`)
+    // }
 
     // Check if the user has already agreed to the terms
     const agreedRecords = await informixService.searchRecords(connection, InformixTableNames.UserTermsOfUseXref,
@@ -55,14 +55,16 @@ async function agreeTermsOfUse (message) {
       throw Error(`User with id ${message.payload.userId} is banned from agreeing to terms with id ${message.payload.termsOfUseId} and legacyId ${message.payload.legacyId}`)
     }
 
-    // Insert the record to user terms of use Xref table to make user agreed to terms
     const createdAt = helper.convertDateToInformixFormat(message.payload.created)
-    await informixService.insertRecord(connection, InformixTableNames.UserTermsOfUseXref, {
+    const body = {
       user_id: message.payload.userId,
       terms_of_use_id: message.payload.legacyId,
       create_date: createdAt,
       modify_date: createdAt
-    })
+    }
+    // Insert the record to user terms of use Xref table to make user agreed to terms
+    logger.info(`Inserting user terms of use Xref Record ${body}`)
+    await informixService.insertRecord(connection, InformixTableNames.UserTermsOfUseXref, body)
 
     // commit the transaction
     await connection.commitTransactionAsync()
@@ -100,4 +102,4 @@ module.exports = {
   agreeTermsOfUse
 }
 
-logger.buildService(module.exports)
+// logger.buildService(module.exports)
