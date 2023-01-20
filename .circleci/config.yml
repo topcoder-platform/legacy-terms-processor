@@ -52,6 +52,15 @@ jobs:
       APPNAME: "legacy-terms-processor"
     steps: *builddeploy_steps
 
+  # Build & Deploy against development backend
+  "build-qa":
+    <<: *defaults
+    environment:
+      DEPLOY_ENV: "QA"
+      LOGICAL_ENV: "qa"
+      APPNAME: "legacy-terms-processor"
+    steps: *builddeploy_steps
+
   "build-prod":
     <<: *defaults
     environment:
@@ -72,6 +81,14 @@ workflows:
               only:
                 - develop
 
+      # QA builds are executed on "develop" branch only.
+      - "build-dev":
+          context : org-global
+          filters:
+            branches:
+              only:
+                - qa
+                
       # Production builds are exectuted only on tagged commits to the
       # master branch.
       - "build-prod":
