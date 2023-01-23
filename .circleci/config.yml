@@ -82,7 +82,7 @@ workflows:
                 - develop
 
       # QA builds are executed on "develop" branch only.
-      - "build-dev":
+      - "build-qa":
           context : org-global
           filters:
             branches:
