@@ -44,7 +44,10 @@ RUN echo "sqlexec 2021/tcp" >> /etc/services
 COPY . /app
 
 WORKDIR /app
-RUN rm -rf node_modules && npm install --unsafe-perm
+RUN rm -rf node_modules
+RUN npm config set unsafe-perm true
+RUN git config --global url."https://git@".insteadOf git://
+RUN npm install --unsafe-perm
 
 ENV PORT=3001
 
