@@ -7,8 +7,8 @@ RUN mkdir /app
 WORKDIR /home/informix
 
 RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak && \
-    echo "deb http://ftp.debian.org/debian/ stretch main non-free contrib" >/etc/apt/sources.list && \
-    echo "deb http://security.debian.org/ stretch/updates main contrib non-free" >>/etc/apt/sources.list
+    echo "deb http://archive.debian.org/debian/ stretch main non-free contrib" >/etc/apt/sources.list 
+    
 
 RUN apt-get -qq update && \
     apt-get -qq install -y wget gcc-6 g++-6 make xz-utils python2.7 git curl
@@ -44,7 +44,10 @@ RUN echo "sqlexec 2021/tcp" >> /etc/services
 COPY . /app
 
 WORKDIR /app
-RUN rm -rf node_modules && npm install --unsafe-perm
+RUN rm -rf node_modules
+RUN npm config set unsafe-perm true
+RUN git config --global url."https://git@".insteadOf git://
+RUN npm install --unsafe-perm
 
 ENV PORT=3001
 
