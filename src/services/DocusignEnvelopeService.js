@@ -84,7 +84,7 @@ async function update (message) {
 
     // Update the terms_of_use record
     await informixService.updateRecord(connection, InformixTableNames.DocusignEnvelope, {
-      is_completed: true
+      is_completed: 1
     }, { docusign_envelope_id: payload.envelopeId })
 
     // commit the transaction
