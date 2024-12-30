@@ -23,6 +23,8 @@ const GET_TERMS_OF_USE_DEPENCENCY_QUERY =
  * @return {Object} The prepared Informix statement
  */
 async function prepare (connection, sql) {
+  logger.info(`SQL statement: ${sql}`)
+
   const stmt = await connection.prepareAsync(sql)
   return Promise.promisifyAll(stmt)
 }
@@ -55,7 +57,6 @@ async function updateRecord (connection, tableName, columnValues, whereCondition
   conditions = _.map(conditions, c => `${c} = ?`)
 
   const updateRecordStmt = await prepare(connection, `update ${tableName} set ${keys.join(', ')} where (${conditions.join(' and ')})`)
-  logger.info(`Update statement: ${JSON.stringify(updateRecordStmt)}`)
   await updateRecordStmt.executeAsync([...Object.values(columnValues), ...Object.values(whereConditions)])
 }
 
