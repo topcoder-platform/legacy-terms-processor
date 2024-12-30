@@ -72,11 +72,11 @@ create.schema = {
 async function update (message) {
   const payload = message.payload.payload
 
+  logger.info(`Payload: ${JSON.stringify(payload)}`)
   if(payload.status!='Completed'){
     logger.info(`Ignoring envelope update message that does not have a "Completed" status: ${JSON.stringify(payload)}`)
     return
   }
-
   // get informix connection
   const connection = await helper.getInformixConnection()
   try {
@@ -85,7 +85,7 @@ async function update (message) {
     // Update the terms_of_use record
     await informixService.updateRecord(connection, InformixTableNames.DocusignEnvelope, {
       is_completed: true
-    }, { docusign_envelope_id: payload.envelope_id })
+    }, { docusign_envelope_id: payload.envelopeId })
 
     // commit the transaction
     await connection.commitTransactionAsync()

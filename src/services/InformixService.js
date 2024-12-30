@@ -59,6 +59,9 @@ async function updateRecord (connection, tableName, columnValues, whereCondition
   logger.info(`SQL statement: ${sql}`)
   logger.info(`Column values: ${JSON.stringify(columnValues)}`)
   logger.info(`Where conditions: ${JSON.stringify(whereConditions)}`)
+  logger.info(`keys: ${JSON.stringify(keys)}`)
+  logger.info(`conditions: ${JSON.stringify(conditions)}`)
+  
   const updateRecordStmt = await prepare(connection, sql )
   await updateRecordStmt.executeAsync([...Object.values(columnValues), ...Object.values(whereConditions)])
 }
