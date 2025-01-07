@@ -73,6 +73,10 @@ const dataHandler = (messageSet, topic, partition) => Promise.each(messageSet, a
         break
       case config.CREATE_DOCUSIGN_ENVELOPE_TOPIC:
         await docusignEnvelopeService.create(messageJSON)
+        break
+      case config.UPDATE_DOCUSIGN_ENVELOPE_TOPIC:
+        await docusignEnvelopeService.update(messageJSON)
+        break
     }
     logger.debug('Successfully processed message')
   } catch (err) {
@@ -104,7 +108,8 @@ const topics = [
   config.UPDATE_RESOURCE_TERMS_TOPIC,
   config.DELETE_RESOURCE_TERMS_TOPIC,
   config.USER_AGREED_TERMS_TOPIC,
-  config.CREATE_DOCUSIGN_ENVELOPE_TOPIC
+  config.CREATE_DOCUSIGN_ENVELOPE_TOPIC,
+  config.UPDATE_DOCUSIGN_ENVELOPE_TOPIC
 ]
 
 consumer
